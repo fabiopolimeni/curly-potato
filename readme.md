@@ -1,4 +1,4 @@
-# Excalibur TypeScript & Vite template
+# Dungon crawler game made with Excalibur JS and AI
 
 ## Getting Started
 
