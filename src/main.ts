@@ -1,20 +1,33 @@
-import { Engine, Loader } from "excalibur";
+import { Engine, DisplayMode, Color } from "excalibur";
 import { Player } from "./player";
 import { Resources } from "./resources";
+import { CustomLoader } from "./custom-loader";
 
 class Game extends Engine {
-    constructor() {
-      super({width: 800, height: 600});
-    }
-    initialize() {
-      
-      const player = new Player();
-      this.add(player);
+  constructor() {
+    super({
+      width: 512, // Initial width
+      height: 512, // Initial height
+      displayMode: DisplayMode.FitScreen, // Adjust display mode
+    });
 
-      const loader = new Loader([Resources.Sword]);
-      this.start(loader);
-    }
+    this.backgroundColor = Color.DarkGray;
   }
-  
-  export const game = new Game();
-  game.initialize();
+
+  onInitialize() {
+    const player = new Player();
+    this.add(player);
+  }
+
+  initialize() {
+    // Create a Loader and pass in the resources to load
+    const loader = new CustomLoader(Object.values(Resources));
+    // Suppress the "Start Game" button on the loading screen
+    loader.suppressPlayButton = true;
+    // Start the game and pass in the loader
+    this.start(loader);
+  }
+}
+
+export const game = new Game();
+game.initialize();
