@@ -1,13 +1,19 @@
-import { Actor, vec } from "excalibur";
+import { vec, Engine } from "excalibur";
+import { Islander } from "./islander";
 
-export class Player extends Actor {
+export class Player extends Islander {
   constructor() {
     super({
-      pos: vec(150, 150),
-      width: 100,
-      height: 100,
+      pos: vec(0, 0),
+      anchor: vec(0.5, 0),
     });
   }
 
-  onInitialize() {}
+  onInitialize(engine: Engine) {
+    this.pos = vec(
+      this.spriteSheet.sprites[0].width / 2,
+      engine.drawHeight - this.spriteSheet.sprites[0].height
+    );
+    super.onInitialize(engine);
+  }
 }

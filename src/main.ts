@@ -6,9 +6,11 @@ import { CustomLoader } from "./custom-loader";
 class Game extends Engine {
   constructor() {
     super({
-      width: 512, // Initial width
-      height: 512, // Initial height
+      width: 256, // Initial width
+      height: 256, // Initial height
       displayMode: DisplayMode.FitScreen, // Adjust display mode
+      snapToPixel: true,
+      antialiasing: false,
     });
 
     this.backgroundColor = Color.DarkGray;

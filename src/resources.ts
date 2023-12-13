@@ -19,6 +19,7 @@ import Torch from "./assets/factions/Goblins/Torch.png";
 import Knight_House from "./assets/factions/Knights/Knight_House.png";
 import Warrior from "./assets/factions/Knights/Warrior.png";
 import Dead from "./assets/effects/Dead.png";
+import Islander from "./assets/islands/islander_.png";
 
 let Resources = {
   foam: new ImageSource(Foam),
@@ -40,6 +41,7 @@ let Resources = {
   knightHouse: new ImageSource(Knight_House),
   warrior: new ImageSource(Warrior),
   dead: new ImageSource(Dead),
+  islander: new ImageSource(Islander),
 };
 
 export { Resources };
