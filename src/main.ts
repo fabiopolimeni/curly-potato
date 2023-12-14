@@ -2,6 +2,7 @@ import { Engine, DisplayMode, Color } from "excalibur";
 import { Player } from "./player";
 import { Resources } from "./resources";
 import { CustomLoader } from "./custom-loader";
+import { Level } from "./level";
 
 class Game extends Engine {
   constructor() {
@@ -17,8 +18,18 @@ class Game extends Engine {
   }
 
   onInitialize() {
+    const the_islands = new Level("The Islands", {
+      bgImage: Resources.the_islands_bg,
+      tileSize: 16,
+    });
+
+    this.addScene(the_islands.name, the_islands);
+    this.goToScene(the_islands.name);
+
+    // level.camera.zoom = 2;
+
     const player = new Player();
-    this.add(player);
+    the_islands.add(player);
   }
 
   initialize() {

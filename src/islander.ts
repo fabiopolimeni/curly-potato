@@ -50,7 +50,9 @@ export class Islander extends Actor {
     });
 
     this.speed = 100;
-    this.body.collisionType = CollisionType.Active; // Set the actor to use active collision
+
+    // Active collision means the actor is physically simulated
+    this.body.collisionType = CollisionType.Active;
   }
 
   onInitialize(engine: Engine) {
@@ -112,7 +114,7 @@ export class Islander extends Actor {
       this.scale.setTo(1, 1);
       // Use the walking animation
       this.graphics.use("walk");
-    } else {
+    } else if (!this.isJumping) {
       // No keys are pressed for horizontal movement, stop horizontal movement
       this.vel.x = 0;
       // Use the idle animation when not moving

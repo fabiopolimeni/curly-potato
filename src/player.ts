@@ -4,16 +4,12 @@ import { Islander } from "./islander";
 export class Player extends Islander {
   constructor() {
     super({
-      pos: vec(0, 0),
-      anchor: vec(0.5, 0),
+      anchor: vec(0.5, 1),
     });
   }
 
   onInitialize(engine: Engine) {
-    this.pos = vec(
-      this.spriteSheet.sprites[0].width / 2,
-      engine.drawHeight - this.spriteSheet.sprites[0].height
-    );
+    this.pos = engine.currentScene.camera.pos;
     super.onInitialize(engine);
   }
 }

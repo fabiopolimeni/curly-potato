@@ -8,8 +8,9 @@ import islands_ from "./assets/islands/islands_1.png";
 import waterfalls_1_1_ from "./assets/islands/waterfalls_1_1.png";
 import mushroom_ from "./assets/islands/mushroom_.png";
 import snail_ from "./assets/islands/snail_.png";
+import the_islands_bg_ from "./assets/islands/the_islands_map.png";
 
-let Resources = {
+const Resources = {
   islander: new ImageSource(islander_),
   objects: new ImageSource(objects_),
   sky: new ImageSource(sky_),
@@ -18,6 +19,7 @@ let Resources = {
   islands: new ImageSource(islands_),
   mushroom: new ImageSource(mushroom_),
   snail: new ImageSource(snail_),
+  the_islands_bg: new ImageSource(the_islands_bg_),
 };
 
 export { Resources };
