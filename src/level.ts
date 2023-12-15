@@ -6,7 +6,11 @@ import {
   Scene,
   TileMap,
   SpriteSheet,
+  SceneActivationContext,
+  StrategyContainer,
+  BoundingBox,
 } from "excalibur";
+import { Player } from "./player";
 
 class Layer extends Array<Actor> {
   name: string;
@@ -24,52 +28,89 @@ export interface MapOptions {
 
 export class Level extends Scene {
   public readonly name: string;
-  private bgTileMap: TileMap;
-  private bgSpriteSheet: SpriteSheet;
+  private bgTileMap?: TileMap;
+  private bgSpriteSheet?: SpriteSheet;
   private actorLayers: Layer[] = [];
+  private player?: Player;
 
-  constructor(name: string, mapOpts: MapOptions) {
+  constructor(name: string, mapOpts?: MapOptions) {
     super();
 
     this.name = name;
 
-    const bgImageRows = mapOpts.bgImage.height / mapOpts.tileSize;
-    const bgImageCols = mapOpts.bgImage.width / mapOpts.tileSize;
+    if (mapOpts) {
+      const bgImageRows = mapOpts.bgImage.height / mapOpts.tileSize;
+      const bgImageCols = mapOpts.bgImage.width / mapOpts.tileSize;
 
-    // Create a tile map from map options
-    this.bgTileMap = new TileMap({
-      rows: bgImageRows,
-      columns: bgImageCols,
-      tileWidth: mapOpts.tileSize,
-      tileHeight: mapOpts.tileSize,
-    });
-
-    this.bgSpriteSheet = SpriteSheet.fromImageSource({
-      image: mapOpts.bgImage,
-      grid: {
+      // Create a tile map from map options
+      this.bgTileMap = new TileMap({
         rows: bgImageRows,
         columns: bgImageCols,
-        spriteWidth: mapOpts.tileSize,
-        spriteHeight: mapOpts.tileSize,
-      },
-    });
+        tileWidth: mapOpts.tileSize,
+        tileHeight: mapOpts.tileSize,
+      });
+
+      this.bgSpriteSheet = SpriteSheet.fromImageSource({
+        image: mapOpts.bgImage,
+        grid: {
+          rows: bgImageRows,
+          columns: bgImageCols,
+          spriteWidth: mapOpts.tileSize,
+          spriteHeight: mapOpts.tileSize,
+        },
+      });
+    }
 
     // Always have at least one base layer
     this.addLayer("base");
   }
 
-  public onInitialize(engine: Engine) {
+  onInitialize(engine: Engine) {
     super.onInitialize(engine);
 
     // Loop through all tilemap's cells and add the sprite to its corresponding cell
-    this.bgTileMap.tiles.forEach((cell) => {
-      const sprite = this.bgSpriteSheet.getSprite(cell.x, cell.y);
+    this.bgTileMap?.tiles.forEach((cell) => {
+      const sprite = this.bgSpriteSheet?.getSprite(cell.x, cell.y);
       if (sprite) {
         cell.addGraphic(sprite);
       }
     });
+  }
 
-    this.add(this.bgTileMap);
+  onActivate(ctx: SceneActivationContext<undefined>): void {
+    super.onActivate(ctx);
+
+    if (this.bgTileMap) {
+      this.add(this.bgTileMap);
+    }
+
+    if (this.player) {
+      const cameraFollowStrategy = new StrategyContainer(this.camera);
+      cameraFollowStrategy.elasticToActor(this.player, 0.1, 0.05);
+
+      // If we don't have a tile map we don't know the bounds of our world
+      if (this.bgTileMap) {
+        const cameraBBox = new BoundingBox(
+          0,
+          0,
+          this.bgTileMap.tileWidth * this.bgTileMap.columns,
+          this.bgTileMap.tileHeight * this.bgTileMap.rows
+        );
+        cameraFollowStrategy.limitCameraBounds(cameraBBox);
+      }
+    }
+  }
+
+  setPlayer(player: Player) {
+    if (this.player) {
+      this.remove(this.player);
+    }
+
+    this.player = player;
+
+    if (this.player) {
+      this.add(this.player);
+    }
   }
 
   addLayer(name: string): number {

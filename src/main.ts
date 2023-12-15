@@ -7,9 +7,9 @@ import { Level } from "./level";
 class Game extends Engine {
   constructor() {
     super({
-      width: 256, // Initial width
-      height: 256, // Initial height
-      displayMode: DisplayMode.FitScreen, // Adjust display mode
+      width: 128, // Initial width
+      height: 128, // Initial height
+      displayMode: DisplayMode.FitScreenAndZoom, // Adjust display mode
       snapToPixel: true,
       antialiasing: false,
     });
@@ -23,13 +23,15 @@ class Game extends Engine {
       tileSize: 16,
     });
 
+    const player = new Player();
+    player.z = 100;
+
+    the_islands.setPlayer(player);
+
     this.addScene(the_islands.name, the_islands);
     this.goToScene(the_islands.name);
 
     // level.camera.zoom = 2;
-
-    const player = new Player();
-    the_islands.add(player);
   }
 
   initialize() {
