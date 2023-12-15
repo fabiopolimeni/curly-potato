@@ -29,8 +29,8 @@ export class Islander extends Actor {
 
   private speed: number;
   private isJumping: boolean = false;
-  private jumpSpeed: number = -300; // Adjust as necessary for the jump strength
-  private gravity: number = 960; // Adjust as necessary for the gravity strength
+  private jumpSpeed: number = -250; // Adjust as necessary for the jump strength
+  private gravity: number = 1500; // Adjust as necessary for the gravity strength
   private groundY: number = 0;
 
   constructor(args: ActorArgs) {

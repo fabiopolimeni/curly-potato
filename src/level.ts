@@ -9,8 +9,10 @@ import {
   SceneActivationContext,
   StrategyContainer,
   BoundingBox,
+  Vector,
 } from "excalibur";
 import { Player } from "./player";
+import { MathUtils } from "./clamp";
 
 class Layer extends Array<Actor> {
   name: string;
@@ -77,7 +79,7 @@ export class Level extends Scene {
     });
   }
 
-  onActivate(ctx: SceneActivationContext<undefined>): void {
+  onActivate(ctx: SceneActivationContext): void {
     super.onActivate(ctx);
 
     if (this.bgTileMap) {
@@ -90,14 +92,41 @@ export class Level extends Scene {
 
       // If we don't have a tile map we don't know the bounds of our world
       if (this.bgTileMap) {
-        const cameraBBox = new BoundingBox(
-          0,
-          0,
+        const bottomRightCorner = new Vector(
           this.bgTileMap.tileWidth * this.bgTileMap.columns,
           this.bgTileMap.tileHeight * this.bgTileMap.rows
         );
+
+        const cameraBBox = new BoundingBox(
+          0,
+          0,
+          bottomRightCorner.x,
+          bottomRightCorner.y
+        );
+
         cameraFollowStrategy.limitCameraBounds(cameraBBox);
       }
+    }
+  }
+
+  onPostUpdate(_engine: Engine, _delta: number): void {
+    // Make sure the player is always inside the world boundries
+    if (this.player && this.bgTileMap) {
+      const bottomRightCorner = new Vector(
+        this.bgTileMap.tileWidth * this.bgTileMap.columns,
+        this.bgTileMap.tileHeight * this.bgTileMap.rows
+      );
+
+      this.player.pos.x = MathUtils.clamp(
+        this.player.pos.x,
+        8,
+        bottomRightCorner.x - 8
+      );
+      this.player.pos.y = MathUtils.clamp(
+        this.player.pos.y,
+        16,
+        bottomRightCorner.x - 16
+      );
     }
   }
 

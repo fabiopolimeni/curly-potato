@@ -30,8 +30,6 @@ class Game extends Engine {
 
     this.addScene(the_islands.name, the_islands);
     this.goToScene(the_islands.name);
-
-    // level.camera.zoom = 2;
   }
 
   initialize() {
