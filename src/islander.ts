@@ -1,17 +1,19 @@
 import {
   Actor,
-  ActorArgs,
   Animation,
   Frame,
   Engine,
   SpriteSheet,
   Sprite,
+  vec,
   Keys,
-  Vector,
+  CollisionStartEvent,
   CollisionType,
+  CollisionEndEvent,
 } from "excalibur";
 import { Resources } from "./resources";
 import { AnimationSequence } from "./animation-sequence";
+import { Platform } from "./platform";
 
 export class Islander extends Actor {
   protected spriteSheet: SpriteSheet;
@@ -27,15 +29,18 @@ export class Islander extends Actor {
     },
   };
 
-  private speed: number;
+  private speed: number = 100;
+  private isOnGround: boolean = false;
   private isJumping: boolean = false;
-  private jumpSpeed: number = -250; // Adjust as necessary for the jump strength
-  private gravity: number = 1500; // Adjust as necessary for the gravity strength
-  private groundY: number = 0;
+  private jumpSpeed: number = -300; // Adjust as necessary for the jump strength
+  private gravity: number = 1000; // Adjust as necessary for the gravity strength
 
-  constructor(args: ActorArgs) {
+  constructor() {
     super({
-      ...args,
+      anchor: vec(0.5, 1),
+      width: 16,
+      height: 16,
+      collisionType: CollisionType.Active,
     });
 
     // Define the sprite sheet
@@ -49,10 +54,13 @@ export class Islander extends Actor {
       },
     });
 
-    this.speed = 100;
+    this.on("collisionstart", (event: CollisionStartEvent) => {
+      this.onCollisionStart(event);
+    });
 
-    // Active collision means the actor is physically simulated
-    this.body.collisionType = CollisionType.Active;
+    this.on("collisionend", (event: CollisionEndEvent) => {
+      this.onCollisionEnd(event);
+    });
   }
 
   onInitialize(engine: Engine) {
@@ -76,27 +84,26 @@ export class Islander extends Actor {
       this.graphics.add(key, clip.animation);
     });
 
-    // Set the initial ground level
-    this.groundY = this.pos.y;
+    this.graphics.use("idle");
   }
 
   onPreUpdate(engine: Engine, delta: number): void {
     super.onPostUpdate(engine, delta);
 
-    const isOnGround = this.pos.y >= this.groundY;
-
     // Reset jumping flag when on the ground
-    if (isOnGround) {
+    if (this.isOnGround) {
       this.isJumping = false;
       this.vel.y = 0;
-      this.pos.y = this.groundY;
     }
 
+    // Move horizontally only while the user is pressing the kyes
+    this.vel.x = 0;
+
     // Apply gravity
-    if (!isOnGround || this.isJumping) {
-      this.acc = new Vector(0, this.gravity);
+    if (!this.isOnGround) {
+      this.acc.setTo(0, this.gravity);
     } else {
-      this.acc = Vector.Zero;
+      this.acc.setTo(0, 0);
     }
 
     // Handle input and play animations
@@ -104,27 +111,43 @@ export class Islander extends Actor {
       // Apply a negative velocity to move left
       this.vel.x = -this.speed;
       // Flip the sprite on the y-axis (actually flipping on the x-axis)
-      this.scale.setTo(-1, 1);
+      this.graphics.flipHorizontal = true;
       // Use the walking animation
       this.graphics.use("walk");
     } else if (engine.input.keyboard.isHeld(Keys.Right)) {
       // Apply a positive velocity to move right
       this.vel.x = this.speed;
       // Ensure the sprite is not flipped when moving right
-      this.scale.setTo(1, 1);
+      this.graphics.flipHorizontal = false;
       // Use the walking animation
       this.graphics.use("walk");
-    } else if (!this.isJumping) {
-      // No keys are pressed for horizontal movement, stop horizontal movement
-      this.vel.x = 0;
-      // Use the idle animation when not moving
-      this.graphics.use("idle"); // Assuming 'idle' is the first clip
     }
 
-    if (engine.input.keyboard.wasPressed(Keys.Up) && isOnGround) {
+    if (engine.input.keyboard.wasPressed(Keys.Up) && !this.isJumping) {
       this.vel.y = this.jumpSpeed;
       this.isJumping = true;
       this.graphics.use("jump");
+    }
+
+    if (this.vel.squareDistance() < 0.01) {
+      this.graphics.use("idle");
+    }
+  }
+
+  public onCollisionStart(event: CollisionStartEvent): void {
+    // Check if the collision is with a Platform
+    if (event.other instanceof Platform) {
+      // Check if the collision normal is pointing up, indicating a collision from above
+      if (event.contact.normal.y > 0) {
+        this.isOnGround = true;
+      }
+    }
+  }
+
+  public onCollisionEnd(event: CollisionEndEvent): void {
+    // Check if the collision is with a Platform
+    if (event.other instanceof Platform) {
+      this.isOnGround = false;
     }
   }
 }

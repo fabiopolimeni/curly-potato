@@ -11,7 +11,6 @@ import {
   BoundingBox,
   Vector,
 } from "excalibur";
-import { Player } from "./player";
 import { MathUtils } from "./clamp";
 
 class Layer extends Array<Actor> {
@@ -30,10 +29,10 @@ export interface MapOptions {
 
 export class Level extends Scene {
   public readonly name: string;
-  private bgTileMap?: TileMap;
-  private bgSpriteSheet?: SpriteSheet;
-  private actorLayers: Layer[] = [];
-  private player?: Player;
+  protected bgTileMap?: TileMap;
+  protected bgSpriteSheet?: SpriteSheet;
+  protected actorLayers: Layer[] = [];
+  protected hero?: Actor;
 
   constructor(name: string, mapOpts?: MapOptions) {
     super();
@@ -81,14 +80,15 @@ export class Level extends Scene {
 
   onActivate(ctx: SceneActivationContext): void {
     super.onActivate(ctx);
+    console.log(`Activated level ${this.name}`);
 
     if (this.bgTileMap) {
       this.add(this.bgTileMap);
     }
 
-    if (this.player) {
+    if (this.hero) {
       const cameraFollowStrategy = new StrategyContainer(this.camera);
-      cameraFollowStrategy.elasticToActor(this.player, 0.1, 0.05);
+      cameraFollowStrategy.elasticToActor(this.hero, 0.1, 0.05);
 
       // If we don't have a tile map we don't know the bounds of our world
       if (this.bgTileMap) {
@@ -109,36 +109,42 @@ export class Level extends Scene {
     }
   }
 
+  onDeactivate(_context: SceneActivationContext<undefined>): void {
+    super.onDeactivate(_context);
+    console.log(`Deactivated level ${this.name}`);
+  }
+
   onPostUpdate(_engine: Engine, _delta: number): void {
     // Make sure the player is always inside the world boundries
-    if (this.player && this.bgTileMap) {
+    if (this.hero && this.bgTileMap) {
       const bottomRightCorner = new Vector(
         this.bgTileMap.tileWidth * this.bgTileMap.columns,
         this.bgTileMap.tileHeight * this.bgTileMap.rows
       );
 
-      this.player.pos.x = MathUtils.clamp(
-        this.player.pos.x,
+      this.hero.pos.x = MathUtils.clamp(
+        this.hero.pos.x,
         8,
         bottomRightCorner.x - 8
       );
-      this.player.pos.y = MathUtils.clamp(
-        this.player.pos.y,
+      this.hero.pos.y = MathUtils.clamp(
+        this.hero.pos.y,
         16,
-        bottomRightCorner.x - 16
+        bottomRightCorner.y - 16
       );
     }
   }
 
-  setPlayer(player: Player) {
-    if (this.player) {
-      this.remove(this.player);
+  setHero(hero: Actor) {
+    if (this.hero) {
+      this.remove(this.hero);
     }
 
-    this.player = player;
+    this.hero = hero;
 
-    if (this.player) {
-      this.add(this.player);
+    if (this.hero) {
+      this.hero.z = 1;
+      this.add(this.hero);
     }
   }
 
@@ -154,7 +160,10 @@ export class Level extends Scene {
       );
     }
 
+    actor.z = layerIndex + 1;
     this.actorLayers[layerIndex].push(actor);
+
+    this.add(actor);
   }
 
   // Remove an actor from all layers
@@ -166,6 +175,7 @@ export class Level extends Scene {
       // If the actor is found, remove it from the layer
       if (actorIndex !== -1) {
         layer.splice(actorIndex, 1);
+        this.remove(actorToRemove);
         return true;
       }
     }

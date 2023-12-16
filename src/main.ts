@@ -1,7 +1,9 @@
-import { Engine, DisplayMode, Color } from "excalibur";
+import { Engine, DisplayMode, Color, Physics, Keys } from "excalibur";
 import { Player } from "./player";
 import { Resources } from "./resources";
 import { CustomLoader } from "./custom-loader";
+import { TheIslands } from "./the-islands";
+import { Islander } from "./islander";
 import { Level } from "./level";
 
 class Game extends Engine {
@@ -10,26 +12,41 @@ class Game extends Engine {
       width: 128, // Initial width
       height: 128, // Initial height
       displayMode: DisplayMode.FitScreenAndZoom, // Adjust display mode
-      snapToPixel: true,
+      snapToPixel: false,
       antialiasing: false,
     });
 
     this.backgroundColor = Color.DarkGray;
+
+    // set global acceleration simulating gravity pointing down
+    Physics.acc.setTo(0, 1000);
   }
 
   onInitialize() {
-    const the_islands = new Level("The Islands", {
-      bgImage: Resources.the_islands_bg,
-      tileSize: 16,
-    });
+    const player = new Player(new Islander());
 
-    const player = new Player();
-    player.z = 100;
+    const the_islands = new TheIslands();
+    the_islands.setHero(player.hero);
 
-    the_islands.setPlayer(player);
+    const the_limbo = new Level("Limbo");
+    this.addScene(the_limbo.name, the_limbo);
 
     this.addScene(the_islands.name, the_islands);
     this.goToScene(the_islands.name);
+
+    this.on("preupdate", () => {
+      if (this.input.keyboard.wasPressed(Keys.R)) {
+        const currentScene = this.currentScene;
+
+        if (currentScene instanceof Level) {
+          const currentLevel = currentScene as Level;
+          this.goToScene(the_limbo.name);
+          this.goToScene(currentLevel.name);
+          console.log("Scene Reloaded");
+        }
+      }
+    });
+    this.on;
   }
 
   initialize() {
