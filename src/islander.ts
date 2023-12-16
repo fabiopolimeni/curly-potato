@@ -145,7 +145,7 @@ export class Islander extends Actor {
   }
 
   public onCollisionEnd(event: CollisionEndEvent): void {
-    // Check if the collision is with a Platform
+    // If we did exit a platform collider then we are no longer on the ground
     if (event.other instanceof Platform) {
       this.isOnGround = false;
     }
