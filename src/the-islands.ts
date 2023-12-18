@@ -1,4 +1,4 @@
-import { Engine, Sprite, vec } from "excalibur";
+import { SceneActivationContext, Sprite, vec } from "excalibur";
 import { Level } from "./level";
 import { Resources } from "./resources";
 import { Platform } from "./platform";
@@ -11,12 +11,12 @@ export class TheIslands extends Level {
     });
   }
 
-  onInitialize(engine: Engine): void {
-    super.onInitialize(engine);
+  onActivate(ctx: SceneActivationContext): void {
+    super.onActivate(ctx);
 
     // Position the player
     if (this.hero) {
-      this.hero.pos = vec(16, engine.drawHeight - 16);
+      this.hero.pos = vec(16, ctx.engine.drawHeight - 16);
     }
 
     // Add a few platforms
@@ -26,13 +26,11 @@ export class TheIslands extends Level {
     });
 
     this.addActorToLayer(
-      new Platform(
-        "platform1",
-        vec(0 + 16, 128),
-        vec(0 + 16, 64),
-        30,
-        pltfSprite
-      )
+      new Platform("platform_1", vec(0 + 4, 128), vec(96, 128), 30, pltfSprite)
+    );
+
+    this.addActorToLayer(
+      new Platform("platform_2", vec(128, 128), vec(128, 64), 50, pltfSprite)
     );
   }
 }

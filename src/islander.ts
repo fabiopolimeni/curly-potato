@@ -1,5 +1,4 @@
 import {
-  Actor,
   Animation,
   Frame,
   Engine,
@@ -14,8 +13,9 @@ import {
 import { Resources } from "./resources";
 import { AnimationSequence } from "./animation-sequence";
 import { Platform } from "./platform";
+import { Hero } from "./hero";
 
-export class Islander extends Actor {
+export class Islander extends Hero {
   protected spriteSheet: SpriteSheet;
   private animSequence: AnimationSequence = {
     idle: {
@@ -34,6 +34,7 @@ export class Islander extends Actor {
   private isJumping: boolean = false;
   private jumpSpeed: number = -300; // Adjust as necessary for the jump strength
   private gravity: number = 1000; // Adjust as necessary for the gravity strength
+  private currentPlatform: Platform | null = null;
 
   constructor() {
     super({
@@ -54,6 +55,8 @@ export class Islander extends Actor {
       },
     });
 
+    this.reset();
+
     this.on("collisionstart", (event: CollisionStartEvent) => {
       this.onCollisionStart(event);
     });
@@ -61,6 +64,13 @@ export class Islander extends Actor {
     this.on("collisionend", (event: CollisionEndEvent) => {
       this.onCollisionEnd(event);
     });
+  }
+
+  public reset(): void {
+    this.isOnGround = false;
+    this.isJumping = false;
+    this.vel.setTo(0, 0);
+    this.currentPlatform = null;
   }
 
   onInitialize(engine: Engine) {
@@ -131,6 +141,8 @@ export class Islander extends Actor {
 
     if (this.vel.squareDistance() < 0.01) {
       this.graphics.use("idle");
+
+      if (this.currentPlatform) this.vel = this.currentPlatform.vel;
     }
   }
 
@@ -140,6 +152,7 @@ export class Islander extends Actor {
       // Check if the collision normal is pointing up, indicating a collision from above
       if (event.contact.normal.y > 0) {
         this.isOnGround = true;
+        this.currentPlatform = event.other as Platform;
       }
     }
   }
@@ -148,6 +161,7 @@ export class Islander extends Actor {
     // If we did exit a platform collider then we are no longer on the ground
     if (event.other instanceof Platform) {
       this.isOnGround = false;
+      this.currentPlatform = null;
     }
   }
 }

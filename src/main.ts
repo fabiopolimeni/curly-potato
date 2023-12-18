@@ -40,9 +40,8 @@ class Game extends Engine {
 
         if (currentScene instanceof Level) {
           const currentLevel = currentScene as Level;
-          this.goToScene(the_limbo.name);
           this.goToScene(currentLevel.name);
-          console.log("Scene Reloaded");
+          console.log(`Level ${currentLevel.name} reloaded`);
         }
       }
     });

@@ -12,6 +12,7 @@ import {
   Vector,
 } from "excalibur";
 import { MathUtils } from "./clamp";
+import { Hero } from "./hero";
 
 class Layer extends Array<Actor> {
   name: string;
@@ -32,7 +33,7 @@ export class Level extends Scene {
   protected bgTileMap?: TileMap;
   protected bgSpriteSheet?: SpriteSheet;
   protected actorLayers: Layer[] = [];
-  protected hero?: Actor;
+  protected hero?: Hero;
 
   constructor(name: string, mapOpts?: MapOptions) {
     super();
@@ -68,14 +69,6 @@ export class Level extends Scene {
 
   onInitialize(engine: Engine) {
     super.onInitialize(engine);
-
-    // Loop through all tilemap's cells and add the sprite to its corresponding cell
-    this.bgTileMap?.tiles.forEach((cell) => {
-      const sprite = this.bgSpriteSheet?.getSprite(cell.x, cell.y);
-      if (sprite) {
-        cell.addGraphic(sprite);
-      }
-    });
   }
 
   onActivate(ctx: SceneActivationContext): void {
@@ -83,6 +76,14 @@ export class Level extends Scene {
     console.log(`Activated level ${this.name}`);
 
     if (this.bgTileMap) {
+      // Loop through all tilemap's cells and add the sprite to its corresponding cell
+      this.bgTileMap.tiles.forEach((cell) => {
+        const sprite = this.bgSpriteSheet?.getSprite(cell.x, cell.y);
+        if (sprite) {
+          cell.addGraphic(sprite);
+        }
+      });
+
       this.add(this.bgTileMap);
     }
 
@@ -111,6 +112,19 @@ export class Level extends Scene {
 
   onDeactivate(_context: SceneActivationContext<undefined>): void {
     super.onDeactivate(_context);
+
+    // Iterate through each layer and remove all actors from the scene
+    for (const layer of this.actorLayers) {
+      while (layer.length > 0) {
+        const actor = layer.pop();
+        if (actor) {
+          this.remove(actor);
+        }
+      }
+    }
+
+    this.hero?.reset();
+
     console.log(`Deactivated level ${this.name}`);
   }
 
@@ -135,7 +149,7 @@ export class Level extends Scene {
     }
   }
 
-  setHero(hero: Actor) {
+  setHero(hero: Hero) {
     if (this.hero) {
       this.remove(this.hero);
     }
