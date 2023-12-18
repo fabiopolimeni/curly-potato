@@ -7,3 +7,4 @@ test/images/actual.png
 test/images/diff-*.png
 
 excalibur.d.ts
+embeddings/
