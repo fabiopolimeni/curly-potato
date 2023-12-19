@@ -157,7 +157,7 @@ export class Level extends Scene {
     this.hero = hero;
 
     if (this.hero) {
-      this.hero.z = 1;
+      this.hero.z = 2;
       this.add(this.hero);
     }
   }

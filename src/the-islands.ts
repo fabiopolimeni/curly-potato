@@ -2,6 +2,7 @@ import { SceneActivationContext, Sprite, vec } from "excalibur";
 import { Level } from "./level";
 import { Resources } from "./resources";
 import { Platform } from "./platform";
+import { Tree } from "./tree";
 
 export class TheIslands extends Level {
   constructor() {
@@ -32,5 +33,17 @@ export class TheIslands extends Level {
     this.addActorToLayer(
       new Platform("platform_2", vec(128, 128), vec(128, 64), 50, pltfSprite)
     );
+
+    const treeSprite = new Sprite({
+      image: Resources.objects,
+      sourceView: {
+        x: 25,
+        y: 70,
+        width: 14,
+        height: 26,
+      },
+    });
+
+    this.addActorToLayer(new Tree(vec(48, 112), treeSprite));
   }
 }

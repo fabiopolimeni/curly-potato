@@ -1,4 +1,4 @@
-import { Engine, DisplayMode, Color, Physics, Keys } from "excalibur";
+import { Engine, DisplayMode, Color, Physics, Keys, Input } from "excalibur";
 import { Player } from "./player";
 import { Resources } from "./resources";
 import { CustomLoader } from "./custom-loader";
@@ -45,7 +45,6 @@ class Game extends Engine {
         }
       }
     });
-    this.on;
   }
 
   initialize() {
@@ -54,7 +53,16 @@ class Game extends Engine {
     // Suppress the "Start Game" button on the loading screen
     loader.suppressPlayButton = true;
     // Start the game and pass in the loader
-    this.start(loader);
+    this.start(loader).then(() => {
+      this.input.keyboard.on("press", (evt: Input.KeyEvent) => {
+        // Check if the "D" key was pressed
+        if (evt.key === Keys.D) {
+          this.debug.entity.showId = false;
+          // Toggle the debug mode
+          this.showDebug(!this.isDebug);
+        }
+      });
+    });
   }
 }
 
