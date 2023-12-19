@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview",
+    "preview": "vite preview",
     "test": "npm run build && ex-test -d ./dist -t ./test/test.js"
   },
   "repository": {
